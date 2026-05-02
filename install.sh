@@ -2,7 +2,7 @@
 # Manual install — copies dispatchers, modules, skills, and agent into ~/.claude/
 # and patches ~/.claude/settings.json with the three hooks.
 #
-# The harness is inactive until a project runs /harness-vendor to populate
+# The harness is inactive until a project runs /vendor to populate
 # its .harness/ directory. Dispatchers exit 0 silently in projects without one.
 #
 # Idempotent: re-running upgrades existing files; never deletes user content.
@@ -57,6 +57,6 @@ echo "==> smoke test"
 "$DEST/harness/test/run.sh"
 
 echo
-echo "Installed. Two skills are now available: /review-diff, /harness-vendor."
-echo "Run /harness-vendor inside a project to activate the harness for that repo."
+echo "Installed. Two skills are now available: /review-diff, /vendor."
+echo "Run /vendor inside a project to activate the harness for that repo."
 echo "Open a fresh Claude Code session to pick up the hook changes."

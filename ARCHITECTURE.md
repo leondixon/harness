@@ -23,7 +23,7 @@ Violations are appended to `$HARNESS_ERR_LOG` and surface in the next prompt as 
 
 ## Bootstrap
 
-`/harness-vendor` activates the harness *and* seeds starter fitness functions in one step. It drops three starters into `.harness/fitness.d/`:
+`/vendor` activates the harness *and* seeds starter fitness functions in one step. It drops three starters into `.harness/fitness.d/`:
 
 | File | Catches |
 |---|---|
