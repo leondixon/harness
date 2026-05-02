@@ -21,14 +21,14 @@ harness/
 ├── context.d/              # feedforward sensors (no args, stdout → prompt)
 ├── checks.d/               # maintainability sensors (one file path arg)
 ├── verify.d/               # behaviour + architecture sensors (no args, cwd = repo root)
-└── templates/              # starter fitness functions seeded by /harness-vendor
+└── templates/              # starter fitness functions seeded by /vendor
 ```
 
 ## Activation
 
 The dispatchers are inactive until a project has a `.harness/` directory. Vendor with:
 
-    /harness-vendor
+    /vendor
 
 Copies all modules into `<repo>/.harness/`. Activates the harness for that project and makes the scripts runnable in CI and pre-commit. Commit `.harness/`. Deactivate with `rm -rf .harness/`.
 
