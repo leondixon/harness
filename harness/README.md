@@ -1,6 +1,16 @@
-# Harness
+# Harness — plumbing
 
-Three dispatchers, modular per-concern scripts, one shared lib. Each script is small and exits 0 (soft mode).
+Three dispatchers + a shared lib. Per-concern scripts live in `*.d/` drop-in directories. Each script is small and exits 0 (soft mode).
+
+For *what* the harness checks (and how to extend each dimension), see the root docs:
+
+- [MAINTAINABILITY.md](../MAINTAINABILITY.md) — `checks.d/`
+- [BEHAVIOUR.md](../BEHAVIOUR.md) — `verify.d/tests.sh`, `verify.d/secrets.sh`
+- [ARCHITECTURE.md](../ARCHITECTURE.md) — `verify.d/project-fitness.sh` + `.harness/fitness.d/`
+
+This README is about the dispatch plumbing only.
+
+## Layout
 
 ```
 harness/
@@ -8,68 +18,42 @@ harness/
 ├── 01-context.sh           # UserPromptSubmit dispatcher → context.d/*
 ├── 02-checks.sh            # PostToolUse dispatcher → checks.d/<lang>
 ├── 03-verify.sh            # Stop dispatcher → verify.d/*
-├── context.d/
-│   ├── git.sh              # branch + dirty count
-│   └── errors.sh           # last-errors.log replay
-├── checks.d/
-│   ├── python.sh           # ruff + mypy
-│   ├── node.sh             # eslint + tsc
-│   ├── go.sh               # go vet
-│   ├── dart.sh             # dart analyze
-│   └── rust.sh             # cargo check
-└── verify.d/
-    ├── secrets.sh          # diff scan
-    ├── tests.sh            # project tests, 60s cap
-    ├── review-hint.sh      # nudge to /review-diff on big diffs
-    └── project-fitness.sh  # runs <repo>/.harness/fitness.d/* (architecture)
+├── context.d/              # feedforward sensors (no args, stdout → prompt)
+├── checks.d/               # maintainability sensors (one file path arg)
+├── verify.d/               # behaviour + architecture sensors (no args, cwd = repo root)
+└── templates/              # starter fitness functions seeded by /harness-vendor
 ```
 
-## Activating for a project
+## Activation
 
-The dispatchers are inactive until a project has a `.harness/` directory. Vendor the harness into a project with:
+The dispatchers are inactive until a project has a `.harness/` directory. Vendor with:
 
     /harness-vendor
 
-This copies all modules into `<repo>/.harness/`, activates the harness for that project, and makes the scripts runnable outside Claude Code (pre-commit, CI). Commit `.harness/` so the team shares the same harness.
-
-To deactivate: `rm -rf .harness/`.
-
-## Architecture fitness — per-project
-
-Architecture rules (layer dependencies, cycle detection, public-API drift, layer enforcement) live under `.harness/fitness.d/<name>.sh`. Scaffold starter checks with:
-
-    /harness-init
-
-Drops in `cycles.sh` (language-aware), `todos.sh` (TODO without issue link), and a `layers.sh.example` template under `.harness/fitness.d/`.
+Copies all modules into `<repo>/.harness/`. Activates the harness for that project and makes the scripts runnable in CI and pre-commit. Commit `.harness/`. Deactivate with `rm -rf .harness/`.
 
 ## Conventions
 
-| Layer       | Input                       | Output                         | Exit |
-|-------------|-----------------------------|--------------------------------|------|
-| `context.d` | none                        | stdout (becomes prompt context)| 0    |
-| `checks.d`  | one file path argument      | stderr; failures → `$HARNESS_ERR_LOG` | 0    |
-| `verify.d`  | none (cwd = repo root)      | stderr; failures → `$HARNESS_ERR_LOG` | 0    |
+| Layer       | Input                  | Output                                | Exit |
+|-------------|------------------------|---------------------------------------|------|
+| `context.d` | none                   | stdout (becomes prompt context)       | 0    |
+| `checks.d`  | one file path argument | stderr; failures → `$HARNESS_ERR_LOG` | 0    |
+| `verify.d`  | none (cwd = repo root) | stderr; failures → `$HARNESS_ERR_LOG` | 0    |
 
-## Add a language
-
-Drop a file in `checks.d/<lang>.sh`. Source `lib.sh`, run your tool, done. Wire the extension in `02-checks.sh`'s `case` block.
-
-## Add a sensor
-
-Drop an executable in `verify.d/`. Dispatcher runs everything in alphabetical order.
+Scripts in `verify.d/` carry a `# Dimension: <name>` header so the file's role is greppable.
 
 ## State
 
 - `~/.claude/state/last-errors.log` — written by `02-checks.sh` and `verify.d/tests.sh`, read by `context.d/errors.sh`.
 - `~/.claude/state/last-tests.log` — full test output from the last `Stop`.
-- `~/.claude/state/skip-tests` (touch to disable test sensor).
+- `~/.claude/state/skip-tests` — touch to disable the test sensor.
 
 ## Test
 
     .harness/test/run.sh        # from a vendored project
     harness/test/run.sh         # from this source repo
 
-Each module is also testable standalone from a vendored project, e.g.:
+Each module is also testable standalone, e.g.:
 
     .harness/checks.d/python.sh /tmp/foo.py
     .harness/verify.d/secrets.sh

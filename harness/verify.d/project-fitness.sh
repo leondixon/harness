@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Dimension: architecture
 # Run project-local architecture fitness functions from <repo>/.harness/fitness.d/.
 # Each script exits 0 (pass) or non-zero (violation). Failures are surfaced and
 # appended to $HARNESS_ERR_LOG so the next prompt sees them.

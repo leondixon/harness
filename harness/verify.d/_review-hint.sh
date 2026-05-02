@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Dimension: meta (workflow nudge, not a quality sensor)
 # Suggest /review-diff when the working diff is substantial.
 set -u
 diff="$(git diff HEAD 2>/dev/null; git diff --cached 2>/dev/null)"
