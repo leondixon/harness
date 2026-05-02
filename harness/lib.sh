@@ -1,19 +1,16 @@
 # Shared helpers for harness modules. Source, don't execute.
-#   source "${HARNESS_LIB:-$HOME/.claude/harness/lib.sh}"
 
 harness_state_dir() {
   echo "${CLAUDE_HARNESS_STATE:-$HOME/.claude/state}"
 }
 
-# Emit base directories for harness modules in priority order.
-# Project (<repo>/.harness) shadows global (~/.claude/harness) by filename.
+# Emit the project .harness directory if present in the current git repo.
+# Returns nothing when outside a git repo or no .harness/ exists.
 harness_module_bases() {
-  local global="${1:-$HOME/.claude/harness}"
   local root
   if root="$(git rev-parse --show-toplevel 2>/dev/null)" && [ -d "$root/.harness" ]; then
     echo "$root/.harness"
   fi
-  echo "$global"
 }
 
 # Walk up from a file or dir to the nearest project root marker.

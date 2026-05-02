@@ -24,21 +24,19 @@ harness/
     └── project-fitness.sh  # runs <repo>/.harness/fitness.d/* (architecture)
 ```
 
-## Project override
+## Activating for a project
 
-When the current git repo has a `.harness/` directory, the dispatchers prefer modules from there over the global ones, matched by filename. Drop a `<repo>/.harness/checks.d/python.sh` to override the global Python check; remove `<repo>/.harness/` to revert.
-
-Vendor a self-contained copy of the whole harness (for CI / pre-commit / teammates):
+The dispatchers are inactive until a project has a `.harness/` directory. Vendor the harness into a project with:
 
     /harness-vendor
 
-The vendored `.harness/02-checks.sh`, `.harness/03-verify.sh` etc. are runnable outside Claude Code — wire them into pre-commit hooks or a CI step the same way you'd wire any shell script.
+This copies all modules into `<repo>/.harness/`, activates the harness for that project, and makes the scripts runnable outside Claude Code (pre-commit, CI). Commit `.harness/` so the team shares the same harness.
+
+To deactivate: `rm -rf .harness/`.
 
 ## Architecture fitness — per-project
 
-Architecture rules (layer dependencies, cycle detection, public-API drift, layer enforcement) are project-specific. The global harness only provides the runner; each project owns its rules under `.harness/fitness.d/<name>.sh`.
-
-Scaffold a project with starter checks:
+Architecture rules (layer dependencies, cycle detection, public-API drift, layer enforcement) live under `.harness/fitness.d/<name>.sh`. Scaffold starter checks with:
 
     /harness-init
 
@@ -68,10 +66,11 @@ Drop an executable in `verify.d/`. Dispatcher runs everything in alphabetical or
 
 ## Test
 
-    ~/.claude/harness/test/run.sh
+    .harness/test/run.sh        # from a vendored project
+    harness/test/run.sh         # from this source repo
 
-Each module is also testable standalone, e.g.:
+Each module is also testable standalone from a vendored project, e.g.:
 
-    ~/.claude/harness/checks.d/python.sh /tmp/foo.py
-    ~/.claude/harness/verify.d/secrets.sh
-    ~/.claude/harness/context.d/git.sh
+    .harness/checks.d/python.sh /tmp/foo.py
+    .harness/verify.d/secrets.sh
+    .harness/context.d/git.sh

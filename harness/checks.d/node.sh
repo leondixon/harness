@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Lint a JS/TS file via eslint; type-check the project via tsc when applicable.
 set -u
-source "${HARNESS_LIB:-$HOME/.claude/harness/lib.sh}"
+_DIR="$(dirname "$(readlink -f "$0")")"
+source "${HARNESS_LIB:-$_DIR/../lib.sh}"
 f="$1"
 root="$(harness_project_root "$f")" || exit 0
 [ -f "$root/package.json" ] || exit 0

@@ -35,19 +35,10 @@ The installer copies the harness modules to `~/.claude/harness/`, the skills to 
 
 ## Project setup
 
-Once installed, every project Claude Code opens gets the harness automatically. Two project-level commands customize:
+The harness is inactive until a project has a `.harness/` directory. Two commands set that up:
 
-- `/harness-init` — drop starter architecture-fitness checks (`cycles.sh`, `todos.sh`, `layers.sh.example`) into `.harness/fitness.d/`. They run on every `Stop`. Edit them; commit them.
-- `/harness-vendor` — eject the entire harness into `.harness/`. The dispatchers detect the project copy and prefer it over the global modules. Use this when you want the harness to travel with the codebase, run in CI, or be wired into pre-commit.
-
-## How modules resolve
-
-When the global hook fires inside a repo, each dispatcher resolves modules in this order:
-
-1. `<repo>/.harness/<dir>/<module>.sh` (project override)
-2. `<plugin or global install>/harness/<dir>/<module>.sh` (default)
-
-Project copy shadows global by filename. To override one Python check, drop a single file at `<repo>/.harness/checks.d/python.sh` — no need to vendor the whole thing.
+- `/harness-vendor` — copy all harness modules into `<repo>/.harness/`. This activates the harness for the project and makes the scripts runnable in CI and pre-commit. Commit `.harness/` so teammates share the same harness. To deactivate: `rm -rf .harness/`.
+- `/harness-init` — drop only starter architecture-fitness checks (`cycles.sh`, `todos.sh`, `layers.sh.example`) into `.harness/fitness.d/`. They run on every `Stop`. Edit them; commit them.
 
 ## Layout
 
@@ -71,14 +62,14 @@ agents/reviewer.md
 
 ## Test the install
 
-    ~/.claude/harness/test/run.sh        # if you used manual install
-    ~/Documents/claude/harness/harness/test/run.sh  # in this repo
+    harness/test/run.sh                  # from this source repo
+    .harness/test/run.sh                 # from a vendored project
 
-Each module is also runnable standalone:
+Each module is also runnable standalone from a vendored project:
 
-    ~/.claude/harness/checks.d/python.sh /tmp/foo.py
-    ~/.claude/harness/verify.d/secrets.sh
-    ~/.claude/harness/context.d/git.sh
+    .harness/checks.d/python.sh /tmp/foo.py
+    .harness/verify.d/secrets.sh
+    .harness/context.d/git.sh
 
 ## Outside Claude Code
 
@@ -107,11 +98,11 @@ Or call them from CI directly. Same scripts, no Claude required.
 
 ## State
 
-`~/.claude/state/` (gitignored):
+`~/.claude/state/` (user-level runtime, not in repo):
 
 - `last-errors.log` — written by `02-checks.sh` and `verify.d/tests.sh`, read by `context.d/errors.sh` next prompt.
 - `last-tests.log` — full output of the most recent test run.
-- `skip-tests` (touch to disable the test sensor in this checkout).
+- `skip-tests` (touch to disable the test sensor for this session).
 
 ## Customize
 

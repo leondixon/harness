@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
-# PostToolUse dispatcher. Routes a file to checks.d/<lang>.sh.
-# Project's <repo>/.harness/checks.d/<lang>.sh shadows global.
-# Accepts file paths as args (CLI use) or as Claude Code hook payload on stdin.
+# PostToolUse dispatcher. Routes a file to .harness/checks.d/<lang>.sh.
+# Exits 0 silently when no project .harness/ exists.
+# Accepts file paths as args (CLI use) or as hook payload on stdin.
 #
 # Test:  echo '{"tool_input":{"file_path":"/tmp/foo.py"}}' | ./02-checks.sh
 #        ./02-checks.sh path/to/file.py
 set -u
 DIR="$(dirname "$(readlink -f "$0")")"
 source "${HARNESS_LIB:-$DIR/lib.sh}"
-export HARNESS_LIB="$DIR/lib.sh"
 STATE="$(harness_state_dir)"; mkdir -p "$STATE"
 ERR_LOG="$STATE/last-errors.log"
 TMP_LOG="$ERR_LOG.tmp"; : > "$TMP_LOG"
@@ -31,9 +30,10 @@ fi
 
 resolve_module() {
   local mod="$1"
+  local base
   while IFS= read -r base; do
     [ -x "$base/checks.d/$mod.sh" ] && { echo "$base/checks.d/$mod.sh"; return 0; }
-  done < <(harness_module_bases "$DIR")
+  done < <(harness_module_bases)
   return 1
 }
 
@@ -50,8 +50,10 @@ dispatch() {
     *.rs)                              mod=rust ;;
     *) return 0 ;;
   esac
-  local script
+  local script base
   script="$(resolve_module "$mod")" || return 0
+  base="$(dirname "$(dirname "$script")")"
+  export HARNESS_LIB="$base/lib.sh"
   "$script" "$f"
 }
 

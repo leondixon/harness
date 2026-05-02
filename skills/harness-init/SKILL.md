@@ -4,7 +4,7 @@ model: haiku
 description: Scaffold project-local architecture fitness functions under .harness/fitness.d/. Detects the project's primary language and drops in cycle-detection plus a TODO-without-issue check and a layers.sh.example template. Use when the user says "/harness-init" or wants to enable fitness checks in a fresh project.
 ---
 
-You are scaffolding architecture fitness functions for the **current project**. The global Claude harness already runs `.harness/fitness.d/*.sh` on every `Stop`; you are dropping in starter checks that the user can edit.
+You are scaffolding architecture fitness functions for the **current project**. The harness runs `.harness/fitness.d/*.sh` on every `Stop` when `.harness/` is present; you are dropping in starter checks that the user can edit. If `.harness/` does not yet exist, remind the user to run `/harness-vendor` first to activate the harness.
 
 ## Procedure
 

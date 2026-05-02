@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Run project tests with a 60s cap. Disable with `touch ~/.claude/state/skip-tests`.
 set -u
-source "${HARNESS_LIB:-$HOME/.claude/harness/lib.sh}"
+_DIR="$(dirname "$(readlink -f "$0")")"
+source "${HARNESS_LIB:-$_DIR/../lib.sh}"
 STATE="$(harness_state_dir)"
 [ -f "$STATE/skip-tests" ] && { echo "[verify:tests] skipped (skip-tests flag)" >&2; exit 0; }
 command -v timeout >/dev/null 2>&1 || { echo "[verify:tests] no timeout(1); skipping" >&2; exit 0; }
