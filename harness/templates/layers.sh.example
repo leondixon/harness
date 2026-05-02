@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Fitness: layer dependency rule. Customize the pattern, then rename to layers.sh.
+#
+# Example below: forbid `src/web/**` from importing anything in `src/db/**`.
+# Replace the directory names + import regex to match your topology.
+set -u
+violations="$(git grep -nE "from .*db|import .*db" -- 'src/web' 2>/dev/null || true)"
+[ -z "$violations" ] && exit 0
+echo "Layer violation: src/web/ imports from src/db/" >&2
+printf '%s\n' "$violations" | head -n 10 >&2
+exit 1

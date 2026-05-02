@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "harness",
+  "description": "Lean modular harness for Claude Code — feedforward + feedback sensors that improve code output. Inspired by martinfowler.com/articles/harness-engineering.html.",
+  "owner": {
+    "name": "Leon Dixon",
+    "url": "https://github.com/leondixon"
+  },
+  "plugins": [
+    {
+      "name": "harness",
+      "description": "Three hooks (UserPromptSubmit, PostToolUse, Stop) plus on-demand /review-diff. Per-language lint+typecheck, project test runner, secret scan, architecture fitness scaffolding, and a vendoring skill so the harness travels with your repo.",
+      "source": "./",
+      "category": "code-quality"
+    }
+  ]
+}
