@@ -8,7 +8,7 @@
 harness/checks.d/<lang>.sh
 ```
 
-Wired to `PostToolUse` (Edit | Write | MultiEdit) via `harness/02-checks.sh`. Active only when a project has `.harness/`.
+Wired to `PostToolUse` (Edit | Write | MultiEdit) via `harness/02-checks.sh`.
 
 ## Contract
 

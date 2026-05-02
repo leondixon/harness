@@ -9,7 +9,7 @@ harness/verify.d/tests.sh       # Dimension: behaviour
 harness/verify.d/secrets.sh     # Dimension: behaviour (boundary leak)
 ```
 
-Wired to `Stop` via `harness/03-verify.sh`. Active only when a project has `.harness/`.
+Wired to `Stop` via `harness/03-verify.sh`.
 
 ## Tests (`verify.d/tests.sh`)
 

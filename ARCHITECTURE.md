@@ -5,11 +5,11 @@
 ## Where it lives
 
 ```
-.harness/fitness.d/<name>.sh    # one fitness function per file (project-local)
+.harness/fitness.d/<name>.sh    # one fitness function per file
 harness/verify.d/project-fitness.sh   # the runner; Dimension: architecture
 ```
 
-Run on every `Stop`. Each project owns its own fitness functions — there is no global ruleset, because there is no global architecture.
+Run on every `Stop`. Each project owns its own fitness functions — there is no shared ruleset.
 
 ## Contract
 
@@ -57,6 +57,6 @@ for s in .harness/fitness.d/*.sh; do echo "==> $s"; "$s"; done
 
 Same scripts run inside Claude Code, in CI (call `.harness/03-verify.sh`), and from pre-commit. One source of truth.
 
-## Why this dimension is project-local
+## Why this dimension lives with the project
 
 Lint rules generalise across projects of the same language. Tests are owned by the project but use a generic runner. Architecture rules cannot be generalised — they encode decisions that are valid *only* in this codebase. That's why fitness functions live under `.harness/`, version-controlled with the code.
