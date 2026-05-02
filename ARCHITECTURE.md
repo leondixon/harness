@@ -59,4 +59,4 @@ Same scripts run inside Claude Code, in CI (call `.harness/03-verify.sh`), and f
 
 ## Why this dimension is project-local
 
-Lint rules generalise across projects of the same language. Tests are owned by the project but use a generic runner. Architecture rules cannot be generalised — they encode decisions that are valid *only* in this codebase. That's why fitness functions live under `.harness/`, version-controlled with the code, not in the global harness.
+Lint rules generalise across projects of the same language. Tests are owned by the project but use a generic runner. Architecture rules cannot be generalised — they encode decisions that are valid *only* in this codebase. That's why fitness functions live under `.harness/`, version-controlled with the code.

@@ -44,7 +44,7 @@ Keep it ≤30 lines. If the script grows, the tool config probably belongs in th
 
 - Per-tool: don't install the binary; `command -v` guards skip it.
 - Per-project: `chmod -x .harness/checks.d/<lang>.sh`.
-- Globally: `rm -rf .harness/` deactivates the harness for that project.
+- Whole project: `rm -rf .harness/` deactivates the harness for that project.
 
 ## Why this dimension
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Smoke test for the harness. Covers dispatchers and modules.
 # Creates a temp git repo with .harness/ vendored so dispatcher tests
-# work without a global harness fallback.
+# exercise the project-local harness.
 set -e
 cd "$(dirname "$0")"
 H="$(cd .. && pwd)"
