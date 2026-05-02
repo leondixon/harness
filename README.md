@@ -6,7 +6,7 @@ Inspired by [Martin Fowler — *Harness Engineering for Coding Agents*](https://
 
 - **[Maintainability](MAINTAINABILITY.md)** — lint and type checks, per-file, on every edit.
 - **[Behaviour](BEHAVIOUR.md)** — project tests and secret-leak scan, on every Stop.
-- **[Architecture fitness](ARCHITECTURE.md)** — project-local rules under `.harness/fitness.d/`.
+- **[Architecture fitness](ARCHITECTURE.md)** — rules under `.harness/fitness.d/`.
 
 ## What you get
 
