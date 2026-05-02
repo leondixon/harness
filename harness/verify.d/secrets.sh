@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Dimension: behaviour (boundary leak)
 # Scan working diff for likely secrets.
 set -u
 diff="$(git diff HEAD 2>/dev/null; git diff --cached 2>/dev/null)"

@@ -1,22 +1,5 @@
-# Project fitness functions
+# Templates
 
-This directory holds architecture fitness functions for **this project**. They are run by the global Claude harness on every `Stop`, plus on demand:
+Starter fitness functions copied into `.harness/fitness.d/` by `/harness-init`.
 
-    .harness/fitness.d/<name>.sh        # one check per file, executable
-    .harness/fitness.d/*.example        # templates — rename to *.sh to enable
-
-Each script:
-
-- Reads from the working tree (or `git diff`) — no args.
-- Exits **0** on pass, non-zero on violation.
-- Prints the violation summary on stderr (≤10 lines).
-
-Violations get persisted to `~/.claude/state/last-errors.log` and surface at the start of the next prompt as `<harness:last-errors>`.
-
-## Disable / amend
-
-Edit, delete, or `chmod -x` any script. The runner skips non-executables.
-
-## Run all locally
-
-    for s in .harness/fitness.d/*.sh; do echo "==> $s"; "$s"; done
+For the contract, examples, and how to write your own, see [ARCHITECTURE.md](../../ARCHITECTURE.md).

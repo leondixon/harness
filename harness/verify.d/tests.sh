@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Dimension: behaviour
 # Run project tests with a 60s cap. Disable with `touch ~/.claude/state/skip-tests`.
 set -u
 _DIR="$(dirname "$(readlink -f "$0")")"
