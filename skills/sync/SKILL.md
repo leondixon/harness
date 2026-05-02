@@ -1,10 +1,15 @@
 ---
 name: sync
 model: haiku
-description: Re-scan the current project for tech it uses (Go, Node, Vue, Tailwind, …) and seed matching fitness-function templates into .harness/fitness.d/ that aren't already there. Safe to run repeatedly — never overwrites existing fitness functions, only adds new ones for tech the project has picked up since the last vendor/sync. Use when the user says "/sync".
+description: Re-scan the current project for tech it uses (Go, Node, Vue, Tailwind, …) and top up `.harness/` with anything new upstream — fitness templates the project now qualifies for, and any new dispatcher modules (`context.d/`, `checks.d/`, `verify.d/`) that didn't exist when the project was vendored. Safe to run repeatedly — never overwrites existing files. Use when the user says "/sync".
 ---
 
-You are syncing the harness's fitness-function library against the **current project**. `/vendor` is a one-shot activation; `/sync` is the ongoing top-up. As a project adopts new tech (a Vue frontend, a Tailwind config, a new language), `/sync` detects that and seeds the matching starter rules — without touching anything the user has already customised.
+You are syncing the harness against the **current project**. `/vendor` is a one-shot activation; `/sync` is the ongoing top-up. It does two jobs:
+
+1. As a project adopts new tech (a Vue frontend, a Tailwind config, a new language), seed the matching starter fitness rules into `.harness/fitness.d/`.
+2. As the upstream harness gains new modules (e.g. a new `verify.d/nuxt-dev.sh`), drop them into the project's vendored `.harness/` so the project picks them up.
+
+Both jobs are strictly additive: existing files in `.harness/` are never overwritten, because users may have customised them.
 
 ## Procedure
 
@@ -52,23 +57,43 @@ You are syncing the harness's fitness-function library against the **current pro
          [ -f "$s" ] && [ ! -e "$d" ] && cp "$s" "$d" && chmod +x "$d" && echo "seeded $d"
        }
 
-5. Also refresh `.harness/templates/` from `$SRC/templates/` so the project has the latest library available locally (this is a copy of upstream starters, not user-owned):
+5. Top up the dispatcher module dirs with any **new** upstream modules. For each of `context.d`, `checks.d`, `verify.d`, copy files from `$SRC/<dir>/` into `.harness/<dir>/` only when the destination file does not already exist. Never overwrite — users may have edited their copy.
+
+       mkdir -p .harness/context.d .harness/checks.d .harness/verify.d
+       for dir in context.d checks.d verify.d; do
+         [ -d "$SRC/$dir" ] || continue
+         for f in "$SRC/$dir"/*; do
+           [ -e "$f" ] || continue
+           name="$(basename "$f")"
+           dest=".harness/$dir/$name"
+           if [ ! -e "$dest" ]; then
+             cp "$f" "$dest"
+             chmod +x "$dest" 2>/dev/null || true
+             echo "synced $dest"
+           fi
+         done
+       done
+
+   Also top up the top-level mechanics (`lib.sh`, `01-context.sh`, `02-checks.sh`, `03-verify.sh`) the same additive way — only copy if absent. If any are missing, the project was vendored before they existed and needs them to dispatch correctly.
+
+6. Refresh `.harness/templates/` from `$SRC/templates/` so the project has the latest starter library available locally (this is a read-only copy of upstream starters, not user-owned, so it's safe to overwrite):
 
        cp -r "$SRC/templates/." .harness/templates/
 
-6. Run any newly-seeded fitness functions once so pre-existing violations surface immediately:
+7. Run any newly-seeded fitness functions once so pre-existing violations surface immediately:
 
        for s in .harness/fitness.d/*.sh; do echo "==> $s"; "$s" || true; done
 
-7. Tell the user, in ≤6 lines:
+8. Tell the user, in ≤8 lines:
    - Which tech was detected.
-   - Which templates were newly seeded (or "nothing new — already in sync").
+   - Which fitness templates were newly seeded (or "nothing new").
+   - Which new dispatcher modules were synced into `context.d/`, `checks.d/`, `verify.d/` (or "modules already in sync").
    - Which seeded checks flagged violations on first run.
-   - Reminder: `.harness/fitness.d/*.sh` are now project-owned; edit or delete freely. Re-running `/sync` will not clobber edits.
+   - Reminder: every `.harness/**/*.sh` is project-owned; edit or delete freely. Re-running `/sync` will not clobber edits, but will not re-add a module the user deleted either — to restore one, copy it back from `$SRC` manually.
 
 ## What you do NOT do
 
-- Do not overwrite any existing file in `.harness/fitness.d/`.
+- Do not overwrite any existing file in `.harness/` (other than `templates/`, which is upstream-owned).
 - Do not modify project source files.
 - Do not commit anything.
 - Do not edit the harness source dir (`$SRC`).
