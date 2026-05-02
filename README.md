@@ -16,8 +16,7 @@ Inspired by [Martin Fowler — *Harness Engineering for Coding Agents*](https://
 | `02-checks.sh`         | `PostToolUse` (Edit\|Write\|MultiEdit) | [maintainability](MAINTAINABILITY.md) | Lint + type-check the file Claude just changed |
 | `03-verify.sh`         | `Stop`                              | [behaviour](BEHAVIOUR.md) + [architecture](ARCHITECTURE.md) | Secret scan + project tests + fitness checks |
 | `/review-diff` skill   | on demand                           | feedback (inferential)                 | Spawn the `reviewer` agent against `git diff HEAD` |
-| `/harness-init` skill  | on demand                           | setup                                  | Scaffold project-local fitness checks under `.harness/fitness.d/` |
-| `/harness-vendor` skill | on demand                          | setup                                  | Eject a self-contained copy of the harness into `<repo>/.harness/` |
+| `/harness-vendor` skill | on demand                          | setup                                  | Vendor the harness into `<repo>/.harness/` and seed starter fitness checks |
 
 All hooks are **soft mode** — they always exit 0 and surface findings on stderr or via `<harness:last-errors>` in the next prompt. Sensors inform; they never block.
 
@@ -28,7 +27,7 @@ All hooks are **soft mode** — they always exit 0 and surface findings on stder
     /plugin marketplace add leondixon/harness
     /plugin install harness@harness
 
-The hooks wire themselves; the three skills (`/review-diff`, `/harness-init`, `/harness-vendor`) become available immediately.
+The hooks wire themselves; the two skills (`/review-diff`, `/harness-vendor`) become available immediately.
 
 ### Manual
 
@@ -39,10 +38,11 @@ The installer copies the harness modules to `~/.claude/harness/`, the skills to 
 
 ## Project setup
 
-The harness is inactive until a project has a `.harness/` directory. Two commands set that up:
+The harness is inactive until a project has a `.harness/` directory. One command sets that up:
 
-- `/harness-vendor` — copy all harness modules into `<repo>/.harness/`. This activates the harness for the project and makes the scripts runnable in CI and pre-commit. Commit `.harness/` so teammates share the same harness. To deactivate: `rm -rf .harness/`.
-- `/harness-init` — drop only starter architecture-fitness checks (`cycles.sh`, `todos.sh`, `layers.sh.example`) into `.harness/fitness.d/`. They run on every `Stop`. Edit them; commit them.
+    /harness-vendor
+
+This copies all harness modules into `<repo>/.harness/` (activating the harness), detects the project's primary language, and seeds starter architecture fitness checks (`cycles.sh`, `todos.sh`, `layers.sh.example`) under `.harness/fitness.d/`. Commit `.harness/` so teammates share the same harness. To deactivate: `rm -rf .harness/`.
 
 ## Layout
 
@@ -58,7 +58,6 @@ harness/                         # the modules (also at <repo>/.harness/ when ve
 ├── templates/                   # starter fitness checks
 └── test/run.sh                  # smoke test
 skills/
-├── harness-init/SKILL.md
 ├── harness-vendor/SKILL.md
 └── review-diff/SKILL.md
 agents/reviewer.md

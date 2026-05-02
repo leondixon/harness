@@ -57,6 +57,6 @@ echo "==> smoke test"
 "$DEST/harness/test/run.sh"
 
 echo
-echo "Installed. Three skills are now available: /review-diff, /harness-init, /harness-vendor."
+echo "Installed. Two skills are now available: /review-diff, /harness-vendor."
 echo "Run /harness-vendor inside a project to activate the harness for that repo."
 echo "Open a fresh Claude Code session to pick up the hook changes."

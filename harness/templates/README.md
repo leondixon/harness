@@ -1,5 +1,5 @@
 # Templates
 
-Starter fitness functions copied into `.harness/fitness.d/` by `/harness-init`.
+Starter fitness functions seeded into `.harness/fitness.d/` by `/harness-vendor`.
 
 For the contract, examples, and how to write your own, see [ARCHITECTURE.md](../../ARCHITECTURE.md).

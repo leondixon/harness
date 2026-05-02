@@ -1,10 +1,10 @@
 ---
 name: harness-vendor
 model: haiku
-description: Activate the harness for the current project by copying all modules into .harness/. The dispatchers only run modules from a project's .harness/ — this is the required step to turn the harness on. Also makes the harness runnable outside Claude Code (CI, pre-commit, teammates). Use when the user says "/harness-vendor".
+description: Activate the harness for the current project by copying all modules into .harness/ and seeding starter architecture fitness checks under .harness/fitness.d/. The dispatchers only run modules from a project's .harness/ — this is the required step to turn the harness on. Also makes the harness runnable outside Claude Code (CI, pre-commit, teammates). Use when the user says "/harness-vendor".
 ---
 
-You are vendoring the harness into the **current project**. The harness dispatchers only look for modules inside a project's `.harness/` directory — this step activates the harness for the repo. After this, the harness travels with the codebase and is usable outside Claude Code (pre-commit, CI).
+You are vendoring the harness into the **current project**. The harness dispatchers only look for modules inside a project's `.harness/` directory — this step activates the harness for the repo. After this, the harness travels with the codebase and is usable outside Claude Code (pre-commit, CI). This skill also seeds language-appropriate starter fitness functions under `.harness/fitness.d/`.
 
 ## Procedure
 
@@ -18,7 +18,7 @@ You are vendoring the harness into the **current project**. The harness dispatch
 
        cd "$(git rev-parse --show-toplevel)"
 
-3. If `.harness/` already exists, ask the user before overwriting. Note that `/harness-init` may have created `.harness/fitness.d/` — preserve it.
+3. If `.harness/` already exists, ask the user before overwriting. Preserve any existing `fitness.d/` they may have edited.
 
 4. Resolve the harness source. Prefer the plugin install path; fall back to a manual install:
 
@@ -48,12 +48,38 @@ You are vendoring the harness into the **current project**. The harness dispatch
 
    Do NOT copy any `state/` dir — runtime state lives in `~/.claude/state/`.
 
-5. Verify the smoke test passes against the vendored copy:
+5. Detect the project's primary language by checking, in this order:
+
+   - `go.mod`         → go
+   - `package.json`   → node
+   - `pubspec.yaml`   → dart
+   - `pyproject.toml` → python
+   - `Cargo.toml`     → rust
+
+   Pick the first match. If none match, set `lang=unknown`.
+
+6. Seed `.harness/fitness.d/` with starter fitness checks (skip any file that already exists from a prior vendor):
+
+       mkdir -p .harness/fitness.d
+       [ -f .harness/fitness.d/todos.sh ]           || cp "$SRC/templates/todos.sh"           .harness/fitness.d/todos.sh
+       [ -f .harness/fitness.d/layers.sh.example ]  || cp "$SRC/templates/layers.sh.example"  .harness/fitness.d/layers.sh.example
+       if [ -f "$SRC/templates/cycles-${lang}.sh" ] && [ ! -f .harness/fitness.d/cycles.sh ]; then
+         cp "$SRC/templates/cycles-${lang}.sh" .harness/fitness.d/cycles.sh
+       fi
+       chmod +x .harness/fitness.d/*.sh 2>/dev/null || true
+
+7. Verify the smoke test passes against the vendored copy:
 
        ./.harness/test/run.sh
 
-6. Tell the user, in 4–6 lines:
+8. Run the fitness functions once to surface any pre-existing violations:
+
+       for s in .harness/fitness.d/*.sh; do echo "==> $s"; "$s" || true; done
+
+9. Tell the user, in 5–7 lines:
    - That `.harness/` is now in the repo and the harness is active. Commit it so the team gets the same harness.
+   - Which fitness checks were seeded under `.harness/fitness.d/`, and which (if any) flagged pre-existing violations.
+   - That `layers.sh.example` is a template — rename to `layers.sh` after editing.
    - The harness dispatchers (wired in `~/.claude/settings.json`) will now run for this project on every Edit/Write/Stop.
    - The vendored copy is also runnable outside Claude — wire it into pre-commit / CI by calling `.harness/02-checks.sh <file>` or `.harness/03-verify.sh`.
    - To customize a module: edit it under `.harness/<dir>/<module>.sh`.
@@ -64,3 +90,4 @@ You are vendoring the harness into the **current project**. The harness dispatch
 - Do not modify any project source files.
 - Do not commit anything — let the user decide.
 - Do not edit the harness source dir (`${CLAUDE_PLUGIN_ROOT}` or `~/.claude/harness/` — the source of truth).
+- Do not overwrite an existing `.harness/fitness.d/<name>.sh` — those are user edits.
