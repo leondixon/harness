@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Lint + type-check a Python file.
 set -u
-source "${HARNESS_LIB:-$HOME/.claude/harness/lib.sh}"
+_DIR="$(dirname "$(readlink -f "$0")")"
+source "${HARNESS_LIB:-$_DIR/../lib.sh}"
 f="$1"
 root="$(harness_project_root "$f")" || exit 0
 command -v ruff >/dev/null 2>&1 && (cd "$root" && harness_run lint:ruff ruff check "$f")

@@ -1,10 +1,10 @@
 ---
 name: harness-vendor
 model: haiku
-description: Eject a self-contained copy of the global harness into the current project's .harness/ directory. The global dispatchers will detect and prefer the project copy on subsequent runs. Use when the user wants the harness to travel with the codebase (CI, pre-commit, teammates) or says "/harness-vendor".
+description: Activate the harness for the current project by copying all modules into .harness/. The dispatchers only run modules from a project's .harness/ — this is the required step to turn the harness on. Also makes the harness runnable outside Claude Code (CI, pre-commit, teammates). Use when the user says "/harness-vendor".
 ---
 
-You are vendoring the harness into the **current project**. After this, the project's `.harness/` shadows the global harness for any module a teammate wants to override, and the project's harness is usable outside Claude Code (pre-commit, CI).
+You are vendoring the harness into the **current project**. The harness dispatchers only look for modules inside a project's `.harness/` directory — this step activates the harness for the repo. After this, the harness travels with the codebase and is usable outside Claude Code (pre-commit, CI).
 
 ## Procedure
 
@@ -53,11 +53,11 @@ You are vendoring the harness into the **current project**. After this, the proj
        ./.harness/test/run.sh
 
 6. Tell the user, in 4–6 lines:
-   - That `.harness/` is now in the repo. Commit it so the team gets the same harness.
-   - Global dispatchers (in `~/.claude/settings.json`) automatically prefer this copy when they run inside this repo.
+   - That `.harness/` is now in the repo and the harness is active. Commit it so the team gets the same harness.
+   - The harness dispatchers (wired in `~/.claude/settings.json`) will now run for this project on every Edit/Write/Stop.
    - The vendored copy is also runnable outside Claude — wire it into pre-commit / CI by calling `.harness/02-checks.sh <file>` or `.harness/03-verify.sh`.
-   - To customize a module: edit it under `.harness/<dir>/<module>.sh`. Project copy shadows global by filename.
-   - To stop using the project copy: `rm -rf .harness/` (the global harness resumes automatically).
+   - To customize a module: edit it under `.harness/<dir>/<module>.sh`.
+   - To deactivate the harness for this project: `rm -rf .harness/`.
 
 ## What you do NOT do
 
