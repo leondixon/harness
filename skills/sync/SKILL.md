@@ -52,9 +52,13 @@ Both jobs are strictly additive: existing files in `.harness/` are never overwri
 
    Implementation sketch:
 
+       describe() { # first comment line after shebang, stripped of leading `# `
+         awk 'NR>1 && /^#/ { sub(/^#[[:space:]]*/, ""); print; exit }' "$1"
+       }
        seed() { # seed <src-template> <dest-name>
          local s="$SRC/templates/$1" d=".harness/fitness.d/$2"
-         [ -f "$s" ] && [ ! -e "$d" ] && cp "$s" "$d" && chmod +x "$d" && echo "seeded $d"
+         [ -f "$s" ] && [ ! -e "$d" ] && cp "$s" "$d" && chmod +x "$d" && \
+           echo "seeded $d — $(describe "$d")"
        }
 
 5. Top up the dispatcher module dirs with any **new** upstream modules. For each of `context.d`, `checks.d`, `verify.d`, copy files from `$SRC/<dir>/` into `.harness/<dir>/` only when the destination file does not already exist. Never overwrite — users may have edited their copy.
@@ -69,7 +73,7 @@ Both jobs are strictly additive: existing files in `.harness/` are never overwri
            if [ ! -e "$dest" ]; then
              cp "$f" "$dest"
              chmod +x "$dest" 2>/dev/null || true
-             echo "synced $dest"
+             echo "synced $dest — $(describe "$dest")"
            fi
          done
        done
@@ -86,8 +90,8 @@ Both jobs are strictly additive: existing files in `.harness/` are never overwri
 
 8. Tell the user, in ≤8 lines:
    - Which tech was detected.
-   - Which fitness templates were newly seeded (or "nothing new").
-   - Which new dispatcher modules were synced into `context.d/`, `checks.d/`, `verify.d/` (or "modules already in sync").
+   - Which fitness templates were newly seeded — list each by name with its one-line purpose (or "nothing new").
+   - Which new dispatcher modules were synced into `context.d/`, `checks.d/`, `verify.d/` — list each by name with its one-line purpose (or "modules already in sync").
    - Which seeded checks flagged violations on first run.
    - Reminder: every `.harness/**/*.sh` is project-owned; edit or delete freely. Re-running `/sync` will not clobber edits, but will not re-add a module the user deleted either — to restore one, copy it back from `$SRC` manually.
 

@@ -6,20 +6,25 @@ git rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 0
 
 allow='^(i|j|k|n|idx|_)$'
 
-# Match declarations: `let|const|var|final NAME =`, `NAME :=` (Go), `let mut? NAME =` (Rust).
 hits="$(git grep -nE \
-  '(\b(let|const|var|final)\s+(mut\s+)?[a-z_]{1,2}\b\s*[:=]|^\s*[a-z_]{1,2}\s*:=)' -- \
+  '((let|const|var|final)[[:space:]]+(mut[[:space:]]+)?[a-z_]+[[:space:]]*[:=]|^[[:space:]]*[a-z_]+[[:space:]]*:=)' -- \
   '*.go' '*.ts' '*.tsx' '*.js' '*.jsx' '*.dart' '*.rs' 2>/dev/null \
   | awk -v allow="$allow" '
       {
-        line=$0
-        # extract candidate name: last word before = or :=
-        if (match(line, /(let|const|var|final)[[:space:]]+(mut[[:space:]]+)?[a-z_]{1,2}\b/)) {
-          n=substr(line, RSTART, RLENGTH); sub(/.*[[:space:]]/, "", n)
-        } else if (match(line, /^[^:]*:[0-9]+:[[:space:]]*[a-z_]{1,2}[[:space:]]*:=/)) {
-          n=substr(line, RSTART, RLENGTH); sub(/.*:[[:space:]]*/, "", n); sub(/[[:space:]]*:=.*/, "", n)
+        # Strip "path:lineno:" prefix to recover the source line.
+        src = $0
+        p = index(src, ":"); if (!p) next; src = substr(src, p+1)
+        p = index(src, ":"); if (!p) next; src = substr(src, p+1)
+
+        name = ""
+        if (match(src, /(let|const|var|final)[[:space:]]+(mut[[:space:]]+)?[a-z_]+/)) {
+          name = substr(src, RSTART, RLENGTH); sub(/.*[[:space:]]/, "", name)
+        } else if (match(src, /^[[:space:]]*[a-z_]+[[:space:]]*:=/)) {
+          name = substr(src, RSTART, RLENGTH)
+          sub(/[[:space:]]*:=.*/, "", name); sub(/^[[:space:]]*/, "", name)
         } else next
-        if (n !~ allow) print
+
+        if (length(name) <= 2 && name !~ allow) print
       }' || true)"
 
 [ -z "$hits" ] && exit 0
