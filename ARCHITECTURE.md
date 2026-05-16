@@ -5,7 +5,7 @@
 ## Where it lives
 
 ```
-.harness/fitness.d/<name>.sh    # one fitness function per file
+.harness/fitness.d/<group>/<name>.sh    # one fitness function per file
 harness/verify.d/project-fitness.sh   # the runner; Dimension: architecture
 ```
 
@@ -23,13 +23,17 @@ Violations are appended to `$HARNESS_ERR_LOG` and surface in the next prompt as 
 
 ## Bootstrap
 
-`/vendor` activates the harness *and* seeds starter fitness functions in one step. It drops three starters into `.harness/fitness.d/`:
+`/vendor` activates the harness *and* copies starter fitness functions in one step. Starters are grouped by framework or platform under `.harness/fitness.d/`:
 
-| File | Catches |
+| Path | Catches |
 |---|---|
-| `cycles-go.sh` *or* `cycles-node.sh` | Import cycles (language-aware) |
-| `todos.sh` | `TODO`/`FIXME`/`XXX` without an issue reference (`#123`, `GH-123`, `JIRA-1`) |
-| `layers.sh.example` | Cross-layer dependency violation. Rename to `layers.sh` and edit |
+| `common/todos.sh` | `TODO`/`FIXME`/`XXX` without an issue reference (`#123`, `GH-123`, `JIRA-1`) |
+| `common/layers.sh.example` | Cross-layer dependency violation. Rename to `layers.sh` after editing |
+| `node/cycles.sh`, `go/cycles.sh` | Import cycles |
+| `next/*.sh` | Next.js-specific fitness checks |
+| `react/*.sh` | React-specific fitness checks |
+
+Delete any starters that do not fit your project after vendoring.
 
 ## Writing your own
 
@@ -52,7 +56,7 @@ Edit, delete, or `chmod -x` any script. The runner skips non-executables.
 ## Run all locally
 
 ```
-for s in .harness/fitness.d/*.sh; do echo "==> $s"; "$s"; done
+find .harness/fitness.d -type f -name '*.sh' -perm -111 | sort | while read -r s; do echo "==> $s"; "$s"; done
 ```
 
 Same scripts run inside Claude Code, in CI (call `.harness/03-verify.sh`), and from pre-commit. One source of truth.

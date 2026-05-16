@@ -23,8 +23,8 @@ chmod +x "$DEST/harness"/0?-*.sh "$DEST/harness/lib.sh" \
          "$DEST/harness/checks.d"/*.sh \
          "$DEST/harness/verify.d"/*.sh \
          "$DEST/harness/context.d"/*.sh \
-         "$DEST/harness/templates"/*.sh \
          "$DEST/harness/test/run.sh" 2>/dev/null || true
+find "$DEST/harness/fitness.d" -type f -name '*.sh' -exec chmod +x {} \; 2>/dev/null || true
 
 cp -r "$SRC/skills/." "$DEST/skills/"
 cp -r "$SRC/agents/." "$DEST/agents/"

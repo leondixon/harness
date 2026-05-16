@@ -21,7 +21,7 @@ harness/
 ├── context.d/              # feedforward sensors (no args, stdout → prompt)
 ├── checks.d/               # maintainability sensors (one file path arg)
 ├── verify.d/               # behaviour + architecture sensors (no args, cwd = repo root)
-└── templates/              # starter fitness functions seeded by /vendor
+└── fitness.d/              # framework-grouped starter fitness functions
 ```
 
 ## Activation
