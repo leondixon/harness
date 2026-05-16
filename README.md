@@ -42,7 +42,7 @@ The harness is inactive until a project has a `.harness/` directory. One command
 
     /vendor
 
-This copies all harness modules into `<repo>/.harness/` (activating the harness), detects the project's primary language, and seeds starter architecture fitness checks (`cycles.sh`, `todos.sh`, `layers.sh.example`) under `.harness/fitness.d/`. Commit `.harness/` so teammates share the same harness. To deactivate: `rm -rf .harness/`.
+This copies all harness modules into `<repo>/.harness/` (activating the harness), including starter architecture fitness checks grouped under `.harness/fitness.d/<framework>/`. Delete the checks you do not want, then commit `.harness/` so teammates share the same harness. To deactivate: `rm -rf .harness/`.
 
 ## Layout
 
@@ -55,7 +55,7 @@ harness/                         # the modules (also at <repo>/.harness/ when ve
 ├── context.d/{git,errors}.sh
 ├── checks.d/{python,node,go,dart,rust}.sh
 ├── verify.d/{secrets,tests,review-hint,project-fitness}.sh
-├── templates/                   # starter fitness checks
+├── fitness.d/{common,node,go,next,react}/
 └── test/run.sh                  # smoke test
 skills/
 ├── vendor/SKILL.md
