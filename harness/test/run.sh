@@ -36,6 +36,20 @@ err="$(cd "$TDIR" && echo "{\"tool_input\":{\"file_path\":\"$tmp\"}}" | "$H/02-c
 echo "==> 02-checks.sh (state cleared)"
 [ ! -s "$STATE/last-errors.log" ] && pass "no error log on clean run" || fail "stale log"
 
+echo "==> 02-checks.sh (no node_modules → silent skip)"
+# Fresh-worktree scenario: package.json lists eslint/typescript but they haven't
+# been installed yet. The check should skip silently, not produce false-positive
+# lint/tsc failures from `npx` trying to fetch from the registry.
+NOINSTALL_DIR="$(mktemp -d)"
+mkdir -p "$NOINSTALL_DIR/src"
+printf '{"name":"x","devDependencies":{"eslint":"10.3.0","typescript":"6.0.0"}}\n' > "$NOINSTALL_DIR/package.json"
+printf '{}\n' > "$NOINSTALL_DIR/tsconfig.json"
+printf 'const unused = 1\n' > "$NOINSTALL_DIR/src/foo.ts"
+(cd "$NOINSTALL_DIR" && echo "{\"tool_input\":{\"file_path\":\"$NOINSTALL_DIR/src/foo.ts\"}}" | "$H/02-checks.sh" 2>/dev/null >/dev/null || true)
+[ ! -s "$STATE/last-errors.log" ] && pass "no node_modules → silent" || fail "spurious failures: $(cat "$STATE/last-errors.log")"
+rm -rf "$NOINSTALL_DIR"
+rm -f "$STATE/last-errors.log"
+
 echo "==> 02-checks.sh (failure persists state)"
 if command -v ruff >/dev/null 2>&1; then
   touch "$TDIR/pyproject.toml"
